@@ -1,0 +1,80 @@
+#Ngoc Tan Nguyen
+#
+
+#Actually I got it, leaving answer for reference,
+#we can simply break the string about the wildcard operator,
+#apply KMP on each part, and check whether each part is a sub-string or not,
+# also, whether the parts are contiguous or not can be checked in linear time, hence the overall time complexity is still linear
+def computeZ(string,Z):
+    #[L,R] make a box which matches
+    #with prefix of string
+    #initilize left, right
+    left=0
+    right=0
+    i=0
+    string_length=len(string)
+    for index in range(len(string)):
+        # if index > Right nothing matches so we will calculate Zk by explicitly comparing characters
+        #string[index...q-1] with string[1...q-index] until mismatch is found
+        if index > right:
+            left=index
+            right=index
+            #keep compare from left to right until mismatch occur
+            while right < len(string) and (string[right-left]==string[right] or (string[right]=="*" or string[right-left]== "*")):
+                right+=1
+            Z[index]=right-left
+            if Z[index]>0:
+                right-=1
+        else:
+            #if index <=r the character str[i] lies in the substring str[l..r]
+            #by definition str[l..r] = str[1..Z_l]
+
+            i=index-left
+            #if Z[i] less than remaining interval then Z[index] will be equal to Z[i]
+            #r and l remain unchange
+            if Z[i]< right-index+1:
+                Z[index]=Z[i]
+            #otherwise Z[index] must be >= r-index+1 so we comparing str[r+1] with str[r-index+2]
+            #until mismatch occur
+            else:
+                left=index
+                while right<string_length and (string[right-left]==string[right] or (string[right]=="*" or string[right-left]== "*")):
+                    right+=1
+                Z[index]=right-left
+                right-=1
+    print(Z)
+def computeSP(pat):
+    Z=[0 for x in range(len(pat))]
+    computeZ(pat,Z)
+    SP=[0 for x in range(len(pat))]
+    for j in range(len(pat)-1,0,-1):
+        index=j+Z[j]-1
+        SP[index]=Z[j]
+    return SP
+def KMP(pat,text):
+    pat_length=len(pat)
+    text_length=len(text)
+
+    SP=computeSP(pat)
+    s=0
+
+    while s+pat_length<=text_length:
+        pat_index=0
+        #compare pat and text from left to right
+        while pat_index<pat_length and pat[pat_index]==text[s+pat_index]:
+            pat_index+=1
+        #if pattern fully match with the text:
+        if pat_index ==pat_length:
+            s=s+(pat_length-SP[len(SP)-1])
+        #if mismatch occurs
+        else:
+            if pat_index != 0:
+                s+=(pat_index - SP[pat_index-1])
+            else:
+                s+=pat_index+1
+def getDFA(pat):
+    dfa=[0 for x in range(len(pat))]
+    longestPrefixIndex=0
+
+
+computeZ('de**du*',[0 for x in range(7)])
